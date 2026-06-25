@@ -1,0 +1,33 @@
+name = "LowObservables"
+uuid = "6c375442-a16b-4aad-a23a-5b494a6eeece"
+version = "0.1.0"
+authors = ["el_oso"]
+
+[deps]
+FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
+GeometryBasics = "5c1252a2-5f33-56bf-86c9-59e7332b4326"
+KernelAbstractions = "63c18a36-062a-441e-b654-da1e3ab1ce7c"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+MeshIO = "7269a6da-0436-5bbc-96c2-40638cbb6118"
+SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+StrictMode = "0e98b4f4-d0e6-42ac-af0a-707c24852f32"
+TypeContracts = "c7a3f1e2-84b5-4d69-9e0a-1f2b3c4d5e6f"
+
+[weakdeps]
+Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+
+[extensions]
+LowObservablesMakieExt = "Makie"
+
+[compat]
+FileIO = "1"
+GeometryBasics = "0.5"
+KernelAbstractions = "0.9.41"
+Makie = "0.21, 0.22, 0.23, 0.24"
+MeshIO = "0.5"
+SpecialFunctions = "2"
+StaticArrays = "1"
+StrictMode = "0.3"
+TypeContracts = "0.13"
+julia = "1.12"

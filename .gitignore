@@ -1,0 +1,13 @@
+*.jl.backup
+*.jl.cov
+*.jl.mem
+Manifest.toml
+docs/Manifest.toml
+test/Manifest.toml
+docs/build/
+docs/generated/
+.DS_Store
+
+# docs tooling
+docs/node_modules/
+docs/package-lock.json
