@@ -5,20 +5,29 @@
 [![Coverage](https://coveralls.io/repos/github/el-oso/LowObservables.jl/badge.svg?branch=master)](https://coveralls.io/github/el-oso/LowObservables.jl?branch=master)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Radar cross-section (RCS) simulation for Julia.
+**Radar cross-section (RCS) prediction for arbitrary shapes in Julia**, using high-frequency
+asymptotics: **Physical Optics (PO)** plus the **Physical Theory of Diffraction (PTD)** edge
+correction — the method (originated by Ufimtsev) behind the radar-signature design of the F-117
+and B-2. Point it at a surface mesh and get the monostatic RCS.
 
-**Phase 0** ships the analytically-exact Mie series for a perfectly-conducting sphere —
-the standard validation target for every RCS code.
+> ⚠️ Research code under active development. The physics is validated against analytic references
+> (see below), but APIs may change.
 
-## Features
+## What it does
 
-- **Exact PEC-sphere Mie series** — monostatic (backscatter) RCS σ [m²] via the
-  Bohren & Huffman formulation with the Wiscombe (1980) truncation criterion
-- **Generic float type** — `mie_rcs_sphere(Float32(a), Float32(λ))` returns `Float32`;
-  ready for GPU arrays and automatic differentiation in later phases
-- **TypeContracts interface** — `AbstractRCSModel` contract; `@verify`-checked at
-  load time; extensible for GTD/PO models in later phases
-- **Validated numerics** — tests cover Rayleigh ∝ (ka)⁴ limit, optical limit πa² (within 0.03%), and first-resonance peak σ/πa² ≈ 3.65
+- **Physical Optics solver** — monostatic & bistatic RCS of a perfectly-conducting triangle mesh,
+  as a backend-generic [KernelAbstractions](https://github.com/JuliaGPU/KernelAbstractions.jl)
+  kernel (CPU now; CUDA backend is a drop-in once GPU hardware is wired up).
+- **PTD edge diffraction** — first-order fringe correction from sharp edges (elementary edge waves),
+  added coherently to PO. This is what makes RCS accurate at off-specular / edge-on aspects, where PO
+  alone collapses into unphysical nulls.
+- **Mesh core** — STL/OBJ import, primitive builders (`unit_cube`, `icosphere`, `flat_plate`),
+  midpoint refinement, per-face normals/areas/centroids, edge–face adjacency.
+- **Exact validation references** — PEC-sphere Mie series and closed-form RCS for canonical bodies
+  of revolution (cone, disk, paraboloid, spherical segment), used as the "answer key".
+- **Generic over float type** (`Float32`/`Float64`), ready for GPU arrays and automatic differentiation.
+- **Interactive documentation** — beginner-friendly, with live WGLMakie widgets (drag the aspect
+  angle, watch the RCS and PO-vs-PTD curves update).
 
 ## Installation
 
@@ -32,40 +41,59 @@ Pkg.add(url="https://github.com/el-oso/LowObservables.jl")
 ```julia
 using LowObservables
 
-a = 0.10        # sphere radius [m]
-λ = 0.03        # wavelength [m]  (≈ 10 GHz)
-σ = mie_rcs_sphere(a, λ)              # → ~0.030 m²
-σ_dBsm = 10log10(σ)                   # → ~ −15 dBsm
+λ = 0.03; k = 2π / λ                       # 10 GHz
 
-# sweep over wavelengths
-λs  = range(0.001, 0.3, length=500)
-σs  = rcs_vs_size(a, λs)
-σ_opt = optical_limit_rcs(a)          # πa² = 0.0314 m²
+# --- a flat plate: PO vs PO+PTD ---
+plate = flat_plate(0.30, 0.30, 40, 40)    # 30×30 cm, refined
+ki = [0.0, 0.0, -1.0]                     # incidence (propagation) direction
+ei = [1.0, 0.0, 0.0]                      # E-field polarization ⊥ ki
 
-# model-type API
-m = MieSphere(a)
-rcs(m, λ)                              # same result
+σ_po  = po_rcs_monostatic(plate, ki, ei; k=k)    # Physical Optics
+σ_ptd = ptd_rcs_monostatic(plate, ki, ei; k=k)   # PO + PTD edge correction
+to_dbsm(σ_ptd)                                   # → dBsm
+
+# --- load your own shape ---
+mesh = load_mesh("aircraft.stl")
+ptd_rcs_monostatic(mesh, ki, ei; k=k)
+
+# --- analytic references (validation "answer key") ---
+mie_rcs_sphere(0.10, λ) / optical_limit_rcs(0.10)   # PEC sphere → ~1 (optical limit πa²)
 ```
 
-## Validation
+## Validated physics
 
-| `ka` | σ/(πa²) | notes |
-|------|---------|-------|
-| 0.01 | 9.0×10⁻⁸ | Rayleigh: 9(ka)⁴ match to <0.002% |
-| 1.03 | 3.655 | first resonance peak (literature ≈ 3.6–4.0) |
-| [30,31] mean | 0.9997 | optical limit (0.03% error) |
+Each result below is checked in the test suite against an independent analytic reference:
+
+| Case | Result | Reference |
+|------|--------|-----------|
+| PEC sphere, high `ka` | σ → π a² | Mie series → optical limit |
+| Flat plate, normal incidence | σ → 4π A² / λ² | exact PO of a plate |
+| Meshed disk, normal incidence | σ/(πa²) → (ka)² | closed-form `flat_disk_rcs` |
+| Flat plate, edge-on | PO ≈ 0, PO+PTD ≠ 0 | rim edge diffraction supplies the RCS |
+| Faceted cube, off-specular | sharp 90° edges shift RCS | PTD edge contribution |
+| Meshed sphere (smooth) | PO+PTD ≈ PO across refinement | feature-edge gate suppresses facet edges |
+
+## Status
+
+| Phase | | |
+|-------|---|---|
+| 0 | Mie sphere + interactive-docs infrastructure | ✅ |
+| 1 | Closed-form RCS for bodies of revolution | ✅ |
+| 2 | Surface-mesh core (import, refine, adjacency) | ✅ |
+| 3 | Physical Optics solver (KernelAbstractions) | ✅ |
+| 4 | CUDA backend | ⏸ pending GPU hardware |
+| 5 | PTD edge diffraction | ✅ |
+| 6 | Radar-equation / altitude detectability | ⬜ planned |
+| 7 | Shape optimization (RCS minimization) | ⬜ planned |
 
 ## Reference
 
-The physical optics (PO) and physical theory of diffraction (PTD) methods implemented
-here follow:
+The PO and PTD methods implemented here follow:
 
 > P. Ya. Ufimtsev, *Fundamentals of the Physical Theory of Diffraction*, 2nd ed.,
 > Wiley–IEEE Press, 2014. ISBN 978-1-118-75366-8.
 
-PTD was originated by Ufimtsev and is the high-frequency asymptotic method behind the
-radar-signature design of the F-117 and B-2. Equation and section numbers cited in the
-source code refer to this book.
+Equation and section numbers cited throughout the source code refer to this book.
 
 ## License
 
