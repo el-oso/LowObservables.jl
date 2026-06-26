@@ -29,6 +29,7 @@ include("fringe.jl")
 include("elementary_edge_waves.jl")
 include("ptd.jl")
 include("radar.jl")
+include("optimize.jl")
 
 # Phase 0–1: RCS model interface and solvers
 export AbstractRCSModel, rcs, rcs_vs_wavelength
@@ -57,6 +58,9 @@ export eew_directivity
 
 # Phase 5b-ii: PO + PTD monostatic RCS
 export ptd_rcs_monostatic
+
+# Phase 7: Shape optimization
+export sector_rcs, optimize_rcs
 
 # Phase 6: Radar range equation / altitude detectability
 export RadarSystem
