@@ -1,5 +1,6 @@
 # LowObservables.jl
 
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://el-oso.github.io/LowObservables.jl/dev/)
 [![CI](https://github.com/el-oso/LowObservables.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/el-oso/LowObservables.jl/actions/workflows/CI.yml)
 [![Coverage](https://coveralls.io/repos/github/el-oso/LowObservables.jl/badge.svg?branch=master)](https://coveralls.io/github/el-oso/LowObservables.jl?branch=master)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -53,6 +54,18 @@ rcs(m, λ)                              # same result
 | 0.01 | 9.0×10⁻⁸ | Rayleigh: 9(ka)⁴ match to <0.002% |
 | 1.03 | 3.655 | first resonance peak (literature ≈ 3.6–4.0) |
 | [30,31] mean | 0.9997 | optical limit (0.03% error) |
+
+## Reference
+
+The physical optics (PO) and physical theory of diffraction (PTD) methods implemented
+here follow:
+
+> P. Ya. Ufimtsev, *Fundamentals of the Physical Theory of Diffraction*, 2nd ed.,
+> Wiley–IEEE Press, 2014. ISBN 978-1-118-75366-8.
+
+PTD was originated by Ufimtsev and is the high-frequency asymptotic method behind the
+radar-signature design of the F-117 and B-2. Equation and section numbers cited in the
+source code refer to this book.
 
 ## License
 

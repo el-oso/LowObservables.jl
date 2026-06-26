@@ -40,3 +40,15 @@ covering units (m²/dBsm), monostatic vs bistatic, and the optical limit.
 ## API reference
 
 See [API Reference](api.md).
+
+## Reference
+
+The physical optics (PO) and physical theory of diffraction (PTD) methods implemented in
+LowObservables.jl follow:
+
+> P. Ya. Ufimtsev, *Fundamentals of the Physical Theory of Diffraction*, 2nd ed.,
+> Wiley–IEEE Press, 2014. ISBN 978-1-118-75366-8.
+
+PTD is the high-frequency asymptotic diffraction method, originated by Ufimtsev, that
+underpinned the radar-signature design of the F-117 and B-2. Equation and section numbers
+cited throughout the source refer to this book.
