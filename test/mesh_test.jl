@@ -236,3 +236,26 @@ end
     fig2 = plot_mesh(mesh; show_normals = true)
     @test fig2 isa Makie.Figure
 end
+
+@testitem "faceted_stealth: watertight closed faceted body" begin
+    using LowObservables
+    m = faceted_stealth()
+    @test nvertices(m) == 7
+    @test nfaces(m) == 10
+    # every undirected edge shared by exactly 2 faces ⇒ closed manifold
+    @test all(==(2), [length(v) for v in values(m.edge_faces)])
+    @test length(m.edge_faces) == 15          # Euler: V−E+F = 7−15+10 = 2
+    @test total_area(m) > 0
+    # real-world dimensions honoured
+    ext(d) = maximum(m.vertices[d,:]) - minimum(m.vertices[d,:])
+    @test isapprox(ext(1), 20.0; rtol=1e-6)   # length
+    @test isapprox(ext(2), 13.0; rtol=1e-6)   # span
+    # refinement keeps it watertight (×4 faces, still closed)
+    mr = refine(m)
+    @test nfaces(mr) == 40
+    @test all(==(2), [length(v) for v in values(mr.edge_faces)])
+    # Float32 genericity
+    m32 = faceted_stealth(T=Float32)
+    @test eltype(m32.areas) == Float32
+    @test all(==(2), [length(v) for v in values(m32.edge_faces)])
+end

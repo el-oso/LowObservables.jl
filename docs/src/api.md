@@ -40,6 +40,12 @@ spherical_segment_rcs
 flat_disk_rcs
 ```
 
+## Mesh primitives
+
+```@docs
+faceted_stealth
+```
+
 ## GPU backend (Phase 4)
 
 ```@docs

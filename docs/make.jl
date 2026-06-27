@@ -25,6 +25,7 @@ makedocs(;
         "Edge Waves (PTD)" => "edge-waves.md",
         "Radar Equation & Stealth" => "radar-equation.md",
         "Shape Optimisation" => "optimization.md",
+        "Stealth Shaping" => "stealth-shaping.md",
         "API Reference" => "api.md",
     ],
     checkdocs = :exports,

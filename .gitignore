@@ -11,3 +11,7 @@ docs/generated/
 # docs tooling
 docs/node_modules/
 docs/package-lock.json
+
+# never commit 3D model assets (license/NoAI safety)
+*.stl
+/assets/

@@ -59,7 +59,7 @@ export paraboloid_rcs, spherical_segment_rcs, flat_disk_rcs
 export TriMesh
 export nvertices, nfaces, total_area
 export load_mesh
-export unit_cube, icosphere, flat_plate
+export unit_cube, icosphere, flat_plate, faceted_stealth
 export refine
 export plot_mesh
 

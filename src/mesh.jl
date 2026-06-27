@@ -361,6 +361,34 @@ function flat_plate(
     return TriMesh(verts, faces)
 end
 
+"""
+    faceted_stealth(; length=20.0, span=13.0, height=4.0, T=Float64) -> TriMesh
+
+A synthetic, all-flat-facet "stealth dart": a closed, watertight body with a flat belly,
+a ridged faceted top, and swept wings — a stylised, F-117-*inspired* shape defined entirely
+in code (no external model, no licence). It is **not** the real F-117 geometry; it exists to
+demonstrate how angled facets deflect the specular flash away from a head-on radar.
+
+7 vertices, 10 triangular facets, genus-0 closed surface. `length`/`span`/`height` set the
+real-world bounding dimensions (metres). Refine it (`refine`) for finer facets before computing
+RCS at higher frequencies. See the "Stealth shaping" docs page.
+"""
+function faceted_stealth(; length::Real = 20.0, span::Real = 13.0, height::Real = 4.0,
+                          T::Type{<:AbstractFloat} = Float64)
+    # vertices: N(nose) Wl Wr Tl Tr (belly, z=0) ; Rf Rb (top ridge)
+    verts = T[ 10  -3  -3  -10  -10   2   -7;
+                0 -6.5 6.5  -2    2   0    0;
+                0   0   0   0    0  3.5  2.5 ]
+    verts[1, :] .*= T(length) / 20
+    verts[2, :] .*= T(span)   / 13
+    verts[3, :] .*= T(height) / 4
+    # belly fan (1-3) + 7 top facets (4-10); winding is fixed by orient-outward in the ctor
+    faces = [ 1 1 1   6 6 6 6 7 7 7;
+              2 4 5   1 3 2 7 2 5 4;
+              4 5 3   2 1 7 3 4 3 5 ]
+    return TriMesh(verts, faces)
+end
+
 # ── Refinement ────────────────────────────────────────────────────────────────
 
 """
