@@ -364,28 +364,39 @@ end
 """
     faceted_stealth(; length=20.0, span=13.0, height=4.0, T=Float64) -> TriMesh
 
-A synthetic, all-flat-facet "stealth dart": a closed, watertight body with a flat belly,
-a ridged faceted top, and swept wings — a stylised, F-117-*inspired* shape defined entirely
-in code (no external model, no licence). It is **not** the real F-117 geometry; it exists to
-demonstrate how angled facets deflect the specular flash away from a head-on radar.
+A synthetic, all-flat-facet **F-117-*inspired* stealth aircraft**, defined entirely in code (no
+external model, no licence). A sharp dart nose, highly swept (~70°) wings to wingtips at the rear,
+a flat belly and a ridged faceted top — a stylised stand-in (it is *not* the real F-117 geometry)
+for demonstrating how angled facets deflect the specular flash away from a head-on radar.
 
-7 vertices, 10 triangular facets, genus-0 closed surface. `length`/`span`/`height` set the
-real-world bounding dimensions (metres). Refine it (`refine`) for finer facets before computing
-RCS at higher frequencies. See the "Stealth shaping" docs page.
+9 vertices, 14 triangular facets, genus-0 closed surface. `length`/`span`/`height` set the
+bounding dimensions (metres). Refine it (`refine`) for finer facets before computing RCS at higher
+frequencies. See the "Stealth shaping" docs page.
 """
 function faceted_stealth(; length::Real = 20.0, span::Real = 13.0, height::Real = 4.0,
                           T::Type{<:AbstractFloat} = Float64)
-    # vertices: N(nose) Wl Wr Tl Tr (belly, z=0) ; Rf Rb (top ridge)
-    verts = T[ 10  -3  -3  -10  -10   2   -7;
-                0 -6.5 6.5  -2    2   0    0;
-                0   0   0   0    0  3.5  2.5 ]
-    verts[1, :] .*= T(length) / 20
-    verts[2, :] .*= T(span)   / 13
-    verts[3, :] .*= T(height) / 4
-    # belly fan (1-3) + 7 top facets (4-10); winding is fixed by orient-outward in the ctor
-    faces = [ 1 1 1   6 6 6 6 7 7 7;
-              2 4 5   1 3 2 7 2 5 4;
-              4 5 3   2 1 7 3 4 3 5 ]
+    #  N(nose) RLE Rwing RTE LTE Lwing LLE  Rf Rb(top ridge)
+    verts = T[ 11    1   -7  -10 -10   -7    1    3  -8;
+                0    4  6.5    3  -3 -6.5   -4    0   0;
+                0    0    0    0   0    0    0  3.8 2.5 ]
+    # scale each axis to the requested bounding-box dimensions
+    for (d, target) in enumerate((length, span, height))
+        ext = maximum(verts[d, :]) - minimum(verts[d, :])
+        verts[d, :] .*= T(target) / T(ext)
+    end
+    #   belly fan (1-5)            top tent (6-14): ridge Rf(8)/Rb(9) → perimeter
+    faces = [ 1 1 1 1 1   8 8 8 9 9 9 8 8 8;
+              2 3 4 5 6   1 2 3 3 4 5 9 6 7;
+              3 4 5 6 7   2 3 9 4 5 6 6 7 1 ]
+    # orient all faces outward (the ctor's `orient_outward` only does a global flip, which cannot
+    # fix per-face winding); point each normal away from the body centroid.
+    bc = vec(sum(verts; dims = 2)) ./ size(verts, 2)
+    for j in axes(faces, 2)
+        a, b, c = verts[:, faces[1,j]], verts[:, faces[2,j]], verts[:, faces[3,j]]
+        if dot(cross(b - a, c - a), (a + b + c) ./ 3 .- bc) < 0
+            faces[2,j], faces[3,j] = faces[3,j], faces[2,j]
+        end
+    end
     return TriMesh(verts, faces)
 end
 

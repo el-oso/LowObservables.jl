@@ -237,22 +237,25 @@ end
     @test fig2 isa Makie.Figure
 end
 
-@testitem "faceted_stealth: watertight closed faceted body" begin
-    using LowObservables
+@testitem "faceted_stealth: watertight F-117-inspired faceted body" begin
+    using LowObservables, LinearAlgebra
     m = faceted_stealth()
-    @test nvertices(m) == 7
-    @test nfaces(m) == 10
+    @test nvertices(m) == 9
+    @test nfaces(m) == 14
     # every undirected edge shared by exactly 2 faces ⇒ closed manifold
     @test all(==(2), [length(v) for v in values(m.edge_faces)])
-    @test length(m.edge_faces) == 15          # Euler: V−E+F = 7−15+10 = 2
+    @test length(m.edge_faces) == 21          # Euler: V−E+F = 9−21+14 = 2
     @test total_area(m) > 0
-    # real-world dimensions honoured
+    # bounding dimensions honoured exactly (extent-based scaling)
     ext(d) = maximum(m.vertices[d,:]) - minimum(m.vertices[d,:])
     @test isapprox(ext(1), 20.0; rtol=1e-6)   # length
     @test isapprox(ext(2), 13.0; rtol=1e-6)   # span
+    @test isapprox(ext(3),  4.0; rtol=1e-6)   # height
+    # faces oriented outward: the 5 belly facets all point down
+    @test count(<(0), m.normals[3, 1:5]) == 5
     # refinement keeps it watertight (×4 faces, still closed)
     mr = refine(m)
-    @test nfaces(mr) == 40
+    @test nfaces(mr) == 56
     @test all(==(2), [length(v) for v in values(mr.edge_faces)])
     # Float32 genericity
     m32 = faceted_stealth(T=Float32)
