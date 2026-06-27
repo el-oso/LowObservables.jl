@@ -1,0 +1,15 @@
+{
+  "benchmark": "po_rcs_sweep",
+  "date": "2026-06-27",
+  "machine": "galen",
+  "gpu": "NVIDIA GeForce RTX 4070 (12 GB)",
+  "cpu_note": "host-side direction loop; one KA kernel + reduction per direction",
+  "mesh": "icosphere(5)",
+  "n_faces": 20480,
+  "n_directions": 180,
+  "cpu_ms": 53.2,
+  "gpu_ms": 30.3,
+  "speedup": 1.8,
+  "agreement": {"cpu_vs_gpu_max_reldiff": 3.3e-14, "monostatic_match": true},
+  "ponytail": "modest at 20k faces; grows with mesh size / a batched-over-directions kernel"
+}

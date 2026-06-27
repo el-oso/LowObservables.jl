@@ -31,6 +31,23 @@ include("ptd.jl")
 include("radar.jl")
 include("optimize.jl")
 
+"""
+    to_gpu(mesh::TriMesh) -> TriMesh
+
+Move a mesh's per-face arrays (`vertices`, `normals`, `areas`, `centroids`) onto the GPU
+so the backend-generic Physical Optics kernel runs on CUDA. Returns a `TriMesh` backed by
+`CuArray`s (`faces`/`edge_faces` stay on the CPU — the PO kernel does not read them).
+
+Requires CUDA.jl to be loaded (implemented in `LowObservablesCUDAExt`); calling it without
+CUDA loaded raises a `MethodError`.
+
+```julia
+using LowObservables, CUDA
+σ_gpu = po_rcs_monostatic(to_gpu(mesh), ki, ei; k=k)   # runs on the GPU
+```
+"""
+function to_gpu end
+
 # Phase 0–1: RCS model interface and solvers
 export AbstractRCSModel, rcs, rcs_vs_wavelength
 export MieSphere
@@ -49,6 +66,9 @@ export plot_mesh
 # Phase 3: Physical Optics
 export po_rcs, po_rcs_monostatic, po_rcs_sweep
 export to_dbsm
+
+# Phase 4: GPU (CUDA backend via extension)
+export to_gpu
 
 # Phase 5a: Fringe directivity (PTD edge-diffraction coefficients)
 export fringe_directivity

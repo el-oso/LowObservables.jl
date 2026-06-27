@@ -20,6 +20,7 @@ makedocs(;
         "Scattering Regimes & BOR" => "scattering-regimes.md",
         "Meshes" => "meshes.md",
         "Physical Optics" => "physical-optics.md",
+        "GPU (CUDA)" => "gpu.md",
         "Edge Waves (PTD)" => "edge-waves.md",
         "Radar Equation & Stealth" => "radar-equation.md",
         "Shape Optimisation" => "optimization.md",

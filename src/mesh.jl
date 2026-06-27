@@ -39,11 +39,11 @@ Surface triangle mesh as struct-of-arrays.
 # ponytail: `edge_faces` is CPU Dict preprocessing for Phase 5 PTD edge extraction.
 # GPU-side CSR adjacency will be built in Phase 5 from this dict if needed.
 """
-struct TriMesh{T<:AbstractFloat, A<:AbstractMatrix{T}}
+struct TriMesh{T<:AbstractFloat, A<:AbstractMatrix{T}, AV<:AbstractVector{T}}
     vertices   :: A
     faces      :: Matrix{Int}
     normals    :: A
-    areas      :: Vector{T}
+    areas      :: AV
     centroids  :: A
     edge_faces :: Dict{Tuple{Int,Int},Vector{Int}}
 end
@@ -134,7 +134,7 @@ function TriMesh(
         normals .= .-normals
     end
     edge_faces = _build_adjacency(F)
-    return TriMesh{T, typeof(vertices)}(
+    return TriMesh{T, typeof(vertices), typeof(areas)}(
         vertices, F, normals, areas, centroids, edge_faces,
     )
 end
