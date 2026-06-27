@@ -16,6 +16,7 @@ makedocs(;
     ),
     pages = [
         "Home" => "index.md",
+        "Tutorial" => "tutorial.md",
         "What is RCS?" => "what-is-rcs.md",
         "Scattering Regimes & BOR" => "scattering-regimes.md",
         "Meshes" => "meshes.md",
