@@ -39,3 +39,9 @@ paraboloid_rcs
 spherical_segment_rcs
 flat_disk_rcs
 ```
+
+## GPU backend (Phase 4)
+
+```@docs
+to_gpu
+```
